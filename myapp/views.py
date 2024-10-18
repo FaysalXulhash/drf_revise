@@ -12,14 +12,44 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
-#concrete api view......
-class personapi(ListCreateAPIView):
-    queryset = Person.objects.all()
-    serializer_class = PersonSerializer 
+from rest_framework import viewsets
 
-class person_details_api(RetrieveUpdateDestroyAPIView):
-    queryset = Person.objects.all()
-    serializer_class = PersonSerializer 
+#view sets 
+class PersonApi(viewsets.ViewSet):
+    def list(self, request):
+        person = Person.objects.all()
+        serializer = PersonSerializer(person, many=True)
+        return Response(serializer.data)
+    
+    def retrieve(self, request, pk):
+        person = Person.objects.get(id=pk)
+        serializer = PersonSerializer(person)
+        return Response(serializer.data) 
+    
+    def create(self, request):
+        serializer = PersonSerializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def update(self, request, pk):
+        person = Person.objects.get(id=pk)
+        serializer = PersonSerializer(person, data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+#concrete api view......
+# class personapi(ListCreateAPIView):
+#     queryset = Person.objects.all()
+#     serializer_class = PersonSerializer 
+
+# class person_details_api(RetrieveUpdateDestroyAPIView):
+#     queryset = Person.objects.all()
+#     serializer_class = PersonSerializer 
 
 # class based api view ...................
 # class Personapi(APIView):

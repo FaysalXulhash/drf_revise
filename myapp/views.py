@@ -10,53 +10,58 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
+#concrete api view......
+class personapi(ListCreateAPIView):
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer 
+
+class person_details_api(RetrieveUpdateDestroyAPIView):
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer 
 
 # class based api view ...................
-class Personapi(APIView):
-    def get(self, request, format=None):
-        persons = Person.objects.all()
-        serializer = PersonSerializer(persons, many=True)
-        return Response(serializer.data)
-    def post(self, request, format=None):
-        serializer = PersonSerializer(data = request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# class Personapi(APIView):
+#     def get(self, request, format=None):
+#         persons = Person.objects.all()
+#         serializer = PersonSerializer(persons, many=True)
+#         return Response(serializer.data)
+#     def post(self, request, format=None):
+#         serializer = PersonSerializer(data = request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class person_detail_api(APIView):
+# class person_detail_api(APIView):
 
-    def get(self, request, pk, format=None):
-        person = Person.objects.get(id=pk)
-        serializer = PersonSerializer(person)
-        return Response(serializer.data)
+#     def get(self, request, pk, format=None):
+#         person = Person.objects.get(id=pk)
+#         serializer = PersonSerializer(person)
+#         return Response(serializer.data)
 
-    def put(self, request, pk, format=None):
-        person = Person.objects.get(id=pk)
-        serializer = PersonSerializer(person, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     def put(self, request, pk, format=None):
+#         person = Person.objects.get(id=pk)
+#         serializer = PersonSerializer(person, data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def patch(self, request, pk, format=None):
-        person = Person.objects.get(id=pk)
-        serializer = PersonSerializer(person, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     def patch(self, request, pk, format=None):
+#         person = Person.objects.get(id=pk)
+#         serializer = PersonSerializer(person, data=request.data, partial=True)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk, format=None):
-        person = Person.objects.get(id=pk)
-        person.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-
-
+#     def delete(self, request, pk, format=None):
+#         person = Person.objects.get(id=pk)
+#         person.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
 
 # #function based api view................
 # @api_view(['GET', 'POST'])

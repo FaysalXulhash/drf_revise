@@ -14,32 +14,37 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 
 from rest_framework import viewsets
 
+
+#model viewsets 
+class PersonApi(viewsets.ModelViewSet):
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
 #view sets 
-class PersonApi(viewsets.ViewSet):
-    def list(self, request):
-        person = Person.objects.all()
-        serializer = PersonSerializer(person, many=True)
-        return Response(serializer.data)
+# class PersonApi(viewsets.ViewSet):
+#     def list(self, request):
+#         person = Person.objects.all()
+#         serializer = PersonSerializer(person, many=True)
+#         return Response(serializer.data)
     
-    def retrieve(self, request, pk):
-        person = Person.objects.get(id=pk)
-        serializer = PersonSerializer(person)
-        return Response(serializer.data) 
+#     def retrieve(self, request, pk):
+#         person = Person.objects.get(id=pk)
+#         serializer = PersonSerializer(person)
+#         return Response(serializer.data) 
     
-    def create(self, request):
-        serializer = PersonSerializer(data = request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     def create(self, request):
+#         serializer = PersonSerializer(data = request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def update(self, request, pk):
-        person = Person.objects.get(id=pk)
-        serializer = PersonSerializer(person, data = request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     def update(self, request, pk):
+#         person = Person.objects.get(id=pk)
+#         serializer = PersonSerializer(person, data = request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 #concrete api view......

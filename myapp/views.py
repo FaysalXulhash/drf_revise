@@ -1,68 +1,113 @@
 from django.shortcuts import render
 from.models import Person 
-from .serializars import PersonSerializar
+from .serializars import PersonSerializer
 from django.http import HttpResponse
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 import io 
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 
 
-def index(request):
-    data = Person.objects.all()
-    serializar = PersonSerializar(data, many=True)
-    json_data = JSONRenderer().render(serializar.data)
-
-    return HttpResponse(json_data, content_type = 'application/json')
-
-def details(request, pk):
-    data = Person.objects.get(pk=pk)
-    serializar = PersonSerializar(data)
-    json_data = JSONRenderer().render(serializar.data)
-
-    return HttpResponse(json_data, content_type = 'application/json')
-
-
-@csrf_exempt
-def person_api(request):
-    if request.method == 'POST':
-        json_data = request.body
-        stream = io.BytesIO(json_data)
-        print('strem:', stream)
-        pythondata = JSONParser().parse(stream)
-        serializer = PersonSerializar(data = pythondata)
+@api_view(['GET', 'POST'])
+def personapi(request):
+    if request.method == 'GET':
+        persons = Person.objects.all()
+        serializer = PersonSerializer(persons, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = PersonSerializer(data = request.data)
         if serializer.is_valid():
             serializer.save()
-            res = {'msg': 'successfully created instance !'}
-            js_data = JSONRenderer().render(res)
-            return HttpResponse(js_data, content_type = 'application/json')
-        json_data = JSONRenderer().render(serializar.errors)
-        return HttpResponse(js_data, content_type = 'application/json')
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'PUT', 'DELETE', 'PATCH'])
+def person_detail_api(request, pk):
+    try:
+        person = Person.objects.get(id=pk)
+    except Person.DoesNotExist:
+        return Response(status = status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = PersonSerializer(person)
+        return Response(serializer.data)
     
-    #update person
-    if request.method == 'PUT':
-        json_data = request.body 
-        stream = io.BytesIO(json_data)
-        pythondata = JSONParser().parse(stream)
-        id = pythondata.get('id')
-        person = Person.objects.get(id=id)
-        serializer = PersonSerializar(person, data = pythondata, partial=True)
+    elif request.method == 'PUT':
+        serializer = PersonSerializer(person, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            res = {'msg': f'successfully updated person - {id}!'}
-            json_data = JSONRenderer().render(res)
-            return HttpResponse(json_data, content_type='application/json')
-        json_data = JSONRenderer().render(serializer.errors)
-        return HttpResponse(json_data, content_type='application/json')
-
-    # delete person
-    if request.method == 'DELETE':
-        json_data = request.body
-        stream = io.BytesIO(json_data)
-        pythondata = JSONParser().parse(stream)
-        id = pythondata.get('id')
-        person = Person.objects.get(id=id)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'PATCH':
+        serializer = PersonSerializer(person, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
         person.delete()
-        res = {'msg': f'successfully deleted person - {id}!'}
-        json_data = JSONRenderer().render(res)
-        return HttpResponse(json_data, content_type='application/json')
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# def index(request):
+#     data = Person.objects.all()
+#     serializar = PersonSerializar(data, many=True)
+#     json_data = JSONRenderer().render(serializar.data)
+
+#     return HttpResponse(json_data, content_type = 'application/json')
+
+# def details(request, pk):
+#     data = Person.objects.get(pk=pk)
+#     serializar = PersonSerializar(data)
+#     json_data = JSONRenderer().render(serializar.data)
+
+#     return HttpResponse(json_data, content_type = 'application/json')
+
+
+# @csrf_exempt
+# def person_api(request):
+#     if request.method == 'POST':
+#         json_data = request.body
+#         stream = io.BytesIO(json_data)
+#         print('strem:', stream)
+#         pythondata = JSONParser().parse(stream)
+#         serializer = PersonSerializar(data = pythondata)
+#         if serializer.is_valid():
+#             serializer.save()
+#             res = {'msg': 'successfully created instance !'}
+#             js_data = JSONRenderer().render(res)
+#             return HttpResponse(js_data, content_type = 'application/json')
+#         json_data = JSONRenderer().render(serializar.errors)
+#         return HttpResponse(js_data, content_type = 'application/json')
+    
+#     #update person
+#     if request.method == 'PUT':
+#         json_data = request.body 
+#         stream = io.BytesIO(json_data)
+#         pythondata = JSONParser().parse(stream)
+#         id = pythondata.get('id')
+#         person = Person.objects.get(id=id)
+#         serializer = PersonSerializar(person, data = pythondata, partial=True)
+#         if serializer.is_valid():
+#             serializer.save()
+#             res = {'msg': f'successfully updated person - {id}!'}
+#             json_data = JSONRenderer().render(res)
+#             return HttpResponse(json_data, content_type='application/json')
+#         json_data = JSONRenderer().render(serializer.errors)
+#         return HttpResponse(json_data, content_type='application/json')
+
+#     # delete person
+#     if request.method == 'DELETE':
+#         json_data = request.body
+#         stream = io.BytesIO(json_data)
+#         pythondata = JSONParser().parse(stream)
+#         id = pythondata.get('id')
+#         person = Person.objects.get(id=id)
+#         person.delete()
+#         res = {'msg': f'successfully deleted person - {id}!'}
+#         json_data = JSONRenderer().render(res)
+#         return HttpResponse(json_data, content_type='application/json')

@@ -9,49 +9,97 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
 
 
-@api_view(['GET', 'POST'])
-def personapi(request):
-    if request.method == 'GET':
+# class based api view ...................
+class Personapi(APIView):
+    def get(self, request, format=None):
         persons = Person.objects.all()
         serializer = PersonSerializer(persons, many=True)
         return Response(serializer.data)
-    elif request.method == 'POST':
+    def post(self, request, format=None):
         serializer = PersonSerializer(data = request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
-@api_view(['GET', 'PUT', 'DELETE', 'PATCH'])
-def person_detail_api(request, pk):
-    try:
+class person_detail_api(APIView):
+
+    def get(self, request, pk, format=None):
         person = Person.objects.get(id=pk)
-    except Person.DoesNotExist:
-        return Response(status = status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
         serializer = PersonSerializer(person)
         return Response(serializer.data)
-    
-    elif request.method == 'PUT':
+
+    def put(self, request, pk, format=None):
+        person = Person.objects.get(id=pk)
         serializer = PersonSerializer(person, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    elif request.method == 'PATCH':
+
+    def patch(self, request, pk, format=None):
+        person = Person.objects.get(id=pk)
         serializer = PersonSerializer(person, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    elif request.method == 'DELETE':
+
+    def delete(self, request, pk, format=None):
+        person = Person.objects.get(id=pk)
         person.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+# #function based api view................
+# @api_view(['GET', 'POST'])
+# def personapi(request):
+#     if request.method == 'GET':
+#         persons = Person.objects.all()
+#         serializer = PersonSerializer(persons, many=True)
+#         return Response(serializer.data)
+#     elif request.method == 'POST':
+#         serializer = PersonSerializer(data = request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# @api_view(['GET', 'PUT', 'DELETE', 'PATCH'])
+# def person_detail_api(request, pk):
+#     try:
+#         person = Person.objects.get(id=pk)
+#     except Person.DoesNotExist:
+#         return Response(status = status.HTTP_404_NOT_FOUND)
+
+    # if request.method == 'GET':
+    #     serializer = PersonSerializer(person)
+    #     return Response(serializer.data)
+    
+    # elif request.method == 'PUT':
+    #     serializer = PersonSerializer(person, data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    # elif request.method == 'PATCH':
+    #     serializer = PersonSerializer(person, data=request.data, partial=True)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    # elif request.method == 'DELETE':
+    #     person.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 # def index(request):
 #     data = Person.objects.all()
